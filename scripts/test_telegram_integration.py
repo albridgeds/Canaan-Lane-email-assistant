@@ -49,10 +49,10 @@ def test_telegram_integration() -> None:
     """Send a real Telegram message in the current notification format using the latest DB record."""
     db_path = settings.sqlite_path
     bot_token = settings.telegram_bot_token
-    chat_id = settings.telegram_chat_id.strip()
+    chat_id = settings.telegram_debug_chat_id.strip()
 
     if not bot_token or not chat_id:
-        pytest.skip("Set TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID to run Telegram integration test.")
+        pytest.skip("Set TELEGRAM_BOT_TOKEN and TELEGRAM_DEBUG_CHAT_ID to run Telegram integration test.")
 
     Storage(db_path)
 
