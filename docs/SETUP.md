@@ -65,11 +65,13 @@ pip install -r requirements.txt
    ```
    GMAIL_LABEL=School
    TELEGRAM_CHAT_ID=your_chat_id_here
+   TELEGRAM_DEBUG_CHAT_ID=your_private_chat_id_here
    OPENAI_MODEL=gpt-4.1-mini
    SQLITE_PATH=assistant.db
    GMAIL_CREDENTIALS_PATH=credentials.json
    GMAIL_TOKEN_PATH=token.json
    NOTIFICATION_MODE=all
+   DEBUG_NOTIFICATION_MODE=important_only
    ```
 
 ## Running the Application

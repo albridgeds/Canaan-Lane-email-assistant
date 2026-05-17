@@ -17,6 +17,25 @@ logging.basicConfig(
 )
 
 
+def _validate_notification_mode(mode: str, setting_name: str) -> str:
+    """Return normalized mode or raise for unsupported values."""
+    normalized_mode = mode.strip().lower()
+    if normalized_mode not in {"all", "important_only", "important"}:
+        raise ValueError(
+            f"Invalid {setting_name}. Use 'important_only' or 'all'."
+        )
+    return normalized_mode
+
+
+def _should_send(mode: str, should_notify: bool) -> bool:
+    """Evaluate whether a channel should send by its mode."""
+    if mode == "all":
+        return True
+    if mode == "no":
+        return False
+    return should_notify
+
+
 def main() -> None:
     """Main entry point for email processing."""
     storage = Storage(settings.sqlite_path)
@@ -28,18 +47,20 @@ def main() -> None:
         api_key=settings.openai_api_key,
         model=settings.openai_model,
     )
-    notifier = TelegramNotifier(
+    main_notifier = TelegramNotifier(
         bot_token=settings.telegram_bot_token,
         chat_id=settings.telegram_chat_id,
     )
+    debug_notifier = TelegramNotifier(
+        bot_token=settings.telegram_bot_token,
+        chat_id=settings.telegram_debug_chat_id,
+    )
 
-    notify_all = settings.notification_mode == "all"
-    notify_important_only = settings.notification_mode in {"important_only", "important"}
-
-    if not (notify_all or notify_important_only):
-        raise ValueError(
-            "Invalid NOTIFICATION_MODE. Use 'important_only' or 'all'."
-        )
+    main_mode = _validate_notification_mode(settings.notification_mode, "NOTIFICATION_MODE")
+    debug_mode = _validate_notification_mode(
+        settings.debug_notification_mode,
+        "DEBUG_NOTIFICATION_MODE",
+    )
 
     logging.info("Checking Gmail label: %s", settings.gmail_label)
     messages = gmail.list_unprocessed_messages(settings.gmail_label, max_results=10)
@@ -70,14 +91,20 @@ def main() -> None:
             if not decision.links:
                 decision.links = extract_links(body)
 
-            should_send = decision.should_notify if notify_important_only else True
+            text = format_notification(message, decision)
 
-            if should_send:
-                text = format_notification(message, decision)
-                notifier.send_message(text)
-                logging.info("Notification sent for: %s", message.subject)
+            if _should_send(main_mode, decision.should_notify):
+                main_notifier.send_message(text)
+                logging.info("Main notification sent for: %s", message.subject)
             else:
-                logging.info("No notification needed: %s", message.subject)
+                logging.info("Main notification skipped by mode for: %s", message.subject)
+
+            if settings.telegram_debug_chat_id:
+                if _should_send(debug_mode, decision.should_notify):
+                    debug_notifier.send_message(text)
+                    logging.info("Debug notification sent for: %s", message.subject)
+                else:
+                    logging.info("Debug notification skipped by mode for: %s", message.subject)
 
             storage.save_email_result(
                 gmail_id=gmail_id,

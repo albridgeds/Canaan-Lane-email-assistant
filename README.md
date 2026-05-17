@@ -122,11 +122,13 @@ OPENAI_API_KEY=your_key
 # config/public.env (non-secrets)
 GMAIL_LABEL=School
 TELEGRAM_CHAT_ID=your_chat_id
+TELEGRAM_DEBUG_CHAT_ID=your_private_chat_id
 OPENAI_MODEL=gpt-4.1-mini
 SQLITE_PATH=assistant.db
 GMAIL_CREDENTIALS_PATH=credentials.json
 GMAIL_TOKEN_PATH=token.json
 NOTIFICATION_MODE=all
+DEBUG_NOTIFICATION_MODE=important_only
 ```
 
 See `config/.env.example` and `config/public.env.example` for templates.
