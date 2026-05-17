@@ -2,23 +2,16 @@
 from __future__ import annotations
 
 import json
-import os
 import sqlite3
-from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
 import requests
-from dotenv import load_dotenv
 
+from src.config import settings
 from src.clients.storage import Storage
 from src.clients.telegram import TelegramNotifier
 from src.utils.text import format_notification
-
-# Load project-level .env for local integration runs; shell env vars keep priority.
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
-load_dotenv(PROJECT_ROOT / ".env", override=False)
-load_dotenv(PROJECT_ROOT / "config" / "public.env", override=False)
 
 
 def _latest_record_from_db(db_path: str) -> dict:
@@ -52,12 +45,11 @@ def _latest_record_from_db(db_path: str) -> dict:
     return record
 
 
-@pytest.mark.integration
-def test_telegram_sends_message_with_latest_db_subject() -> None:
+def test_telegram_integration() -> None:
     """Send a real Telegram message in the current notification format using the latest DB record."""
-    db_path = os.getenv("EMAIL_ASSISTANT_DB_PATH") or os.getenv("SQLITE_PATH") or "assistant.db"
-    bot_token = os.getenv("TELEGRAM_BOT_TOKEN")
-    chat_id = (os.getenv("TELEGRAM_CHAT_ID") or "").strip()
+    db_path = settings.sqlite_path
+    bot_token = settings.telegram_bot_token
+    chat_id = settings.telegram_chat_id.strip()
 
     if not bot_token or not chat_id:
         pytest.skip("Set TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID to run Telegram integration test.")
@@ -94,3 +86,7 @@ def test_telegram_sends_message_with_latest_db_subject() -> None:
             except Exception:
                 body = "<failed to read response body>"
         pytest.fail(f"Telegram sendMessage failed: {exc}. Response body: {body}")
+
+
+if __name__ == "__main__":
+    test_telegram_integration()
