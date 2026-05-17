@@ -6,6 +6,7 @@ Files:
 - `email-assistant.service` - one-shot run of `app.py`
 - `email-assistant.timer` - periodic schedule for the service
 - `install.sh` - helper installer script
+- `update.sh` - manual update script (sync from GitHub `main` + reload units)
 
 Before install:
 1. Update `User`, `WorkingDirectory`, and `ExecStart` in `email-assistant.service`.
@@ -39,6 +40,19 @@ sudo systemctl restart email-assistant.timer
 # Optional: run job immediately to verify
 sudo systemctl start email-assistant.service
 ```
+
+Manual update on Raspberry Pi:
+```bash
+cd /home/pi/email_assistant/systemd_template
+chmod +x update.sh
+./update.sh
+```
+
+What `update.sh` does:
+- fetches and hard-resets local repo to `origin/main`
+- installs Python dependencies from `requirements.txt` using `venv`/`.venv` if present
+- installs current unit files into `/etc/systemd/system`
+- runs `systemctl daemon-reload`, restarts timer, and restarts service once
 
 Disable/remove:
 ```bash
