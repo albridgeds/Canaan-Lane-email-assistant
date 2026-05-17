@@ -1,0 +1,12 @@
+[Unit]
+Description=Run Email Assistant periodically (weekdays 9:00–18:00, every hour)
+
+[Timer]
+# Every hour at :00, Monday–Friday, 09:00–18:00
+OnCalendar=Mon..Fri 09,10,11,12,13,14,15,16,17,18:00:00
+OnBootSec=2min
+Persistent=true
+Unit=email-assistant.service
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,2 @@
+"""Email Assistant - Data models."""
+

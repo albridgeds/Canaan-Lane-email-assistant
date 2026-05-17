@@ -1,0 +1,19 @@
+[Unit]
+Description=Email Assistant processor (oneshot)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+# Update User/WorkingDirectory/ExecStart for your Raspberry Pi setup.
+User=user
+WorkingDirectory=/home/user/workspace/email_assistant
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/home/user/workspace/email_assistant/venv/bin/python /home/user/workspace/email_assistant/app.py
+
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
+

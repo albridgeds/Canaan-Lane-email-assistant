@@ -1,0 +1,2 @@
+"""Email Assistant - Client modules."""
+

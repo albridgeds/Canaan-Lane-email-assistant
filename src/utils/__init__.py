@@ -1,0 +1,2 @@
+"""Email Assistant - Utility modules."""
+
