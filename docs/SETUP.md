@@ -83,6 +83,21 @@ pip install -r requirements.txt
 python app.py
 ```
 
+### Daily Deadline Reminder
+
+```powershell
+python scripts\send_deadline_reminders.py
+```
+
+This sends one aggregated reminder for tomorrow deadlines (`should_notify=True`) to both
+`TELEGRAM_CHAT_ID` and `TELEGRAM_DEBUG_CHAT_ID` (if debug chat is configured).
+
+### Optional: schedule daily reminder in Windows Task Scheduler
+
+```powershell
+schtasks /Create /SC DAILY /ST 19:00 /TN "EmailAssistant-DeadlineReminder" /TR "powershell.exe -NoProfile -ExecutionPolicy Bypass -Command \"cd C:\Users\albri\PycharmProjects\email_assistant; .\.venv\Scripts\python.exe scripts\send_deadline_reminders.py\""
+```
+
 ### View Database Records
 
 ```powershell
@@ -127,6 +142,7 @@ email_assistant/
 │       ├── prompts.py            # LLM prompts
 │       └── text.py               # Text utilities
 ├── scripts/
+│   ├── send_deadline_reminders.py # Daily deadline reminders
 │   └── view_db.py                # Database viewer
 ├── app.py                        # Main application
 ├── requirements.txt              # Dependencies

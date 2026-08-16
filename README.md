@@ -7,6 +7,7 @@ An intelligent email filtering system that uses LLM to prioritize school emails 
 - 📧 **Gmail Integration** - Automatically fetches emails from a specified Gmail label
 - 🤖 **LLM Classification** - Uses OpenAI GPT to intelligently analyze emails
 - 🔔 **Smart Notifications** - Sends Telegram notifications for important emails
+- ⏰ **Daily Deadline Digest** - Sends one daily aggregated reminder for tasks due tomorrow
 - 💾 **Full History Storage** - Stores all LLM analysis results in SQLite database
 - 📊 **Database Viewer** - CLI tool to view and filter processed emails
 
@@ -59,6 +60,14 @@ Process emails from Gmail and send notifications:
 python app.py
 ```
 
+### Daily Deadline Reminder
+
+Send one aggregated reminder for tomorrow deadlines (`should_notify=True`) to both main and debug chats:
+
+```powershell
+python scripts\send_deadline_reminders.py
+```
+
 ### View Database
 
 View all processed emails:
@@ -94,6 +103,7 @@ email_assistant/
 │       ├── prompts.py            # LLM system prompts
 │       └── text.py               # Text processing utilities
 ├── scripts/
+│   ├── send_deadline_reminders.py # Daily deadline digest sender
 │   └── view_db.py                # Database viewer CLI
 ├── docs/
 │   ├── SETUP.md                  # Detailed setup instructions
@@ -139,7 +149,8 @@ See `config/.env.example` and `config/public.env.example` for templates.
 2. **Analyze** - Sends to OpenAI for intelligent classification
 3. **Store** - Saves full LLM output to SQLite database
 4. **Notify** - Sends Telegram message for important emails
-5. **View** - Access history via CLI viewer
+5. **Remind** - Sends daily aggregated deadline digest for tomorrow tasks
+6. **View** - Access history via CLI viewer
 
 ## Database Schema
 
