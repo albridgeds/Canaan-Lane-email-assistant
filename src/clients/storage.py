@@ -4,6 +4,7 @@ from __future__ import annotations
 import json
 import sqlite3
 from contextlib import contextmanager
+from typing import Iterator
 
 
 class Storage:
@@ -14,7 +15,7 @@ class Storage:
         self._init_db()
 
     @contextmanager
-    def _connect(self):
+    def _connect(self) -> Iterator[sqlite3.Connection]:
         conn = sqlite3.connect(self.db_path)
         conn.row_factory = sqlite3.Row
         try:
@@ -67,6 +68,18 @@ class Storage:
                     conn.execute(
                         f"ALTER TABLE processed_emails ADD COLUMN {col} {col_type}"
                     )
+
+            conn.execute(
+                """
+                CREATE TABLE IF NOT EXISTS reminder_log (
+                    reminder_type TEXT NOT NULL,
+                    reminder_date TEXT NOT NULL,
+                    channel       TEXT NOT NULL,
+                    sent_at       DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    PRIMARY KEY (reminder_type, reminder_date, channel)
+                )
+                """
+            )
 
     def is_processed(self, gmail_id: str) -> bool:
         """Check if an email has been processed."""
@@ -162,4 +175,65 @@ class Storage:
                 d["links"] = []
             result.append(d)
         return result
+
+    def get_deadlines_for_date(self, target_date_iso: str) -> list[dict]:
+        """Return notifiable emails with deadline matching a specific date (YYYY-MM-DD)."""
+        with self._connect() as conn:
+            rows = conn.execute(
+                """
+                SELECT gmail_id, subject, sender, email_date,
+                       action_required, importance, action, deadline,
+                       summary, reason, links, should_notify, processed_at
+                FROM processed_emails
+                WHERE should_notify = 1
+                  AND deadline IS NOT NULL
+                  AND TRIM(deadline) <> ''
+                  AND date(deadline) = date(?)
+                ORDER BY
+                    CASE lower(importance)
+                        WHEN 'high' THEN 1
+                        WHEN 'medium' THEN 2
+                        WHEN 'low' THEN 3
+                        ELSE 4
+                    END,
+                    subject COLLATE NOCASE ASC
+                """,
+                (target_date_iso,),
+            ).fetchall()
+
+        result: list[dict] = []
+        for row in rows:
+            d = dict(row)
+            d["action_required"] = bool(d["action_required"])
+            d["should_notify"] = bool(d["should_notify"])
+            try:
+                d["links"] = json.loads(d["links"]) if d["links"] else []
+            except (json.JSONDecodeError, TypeError):
+                d["links"] = []
+            result.append(d)
+        return result
+
+    def was_reminder_sent(self, reminder_type: str, reminder_date: str, channel: str) -> bool:
+        """Return True if reminder was already sent for this type/date/channel."""
+        with self._connect() as conn:
+            row = conn.execute(
+                """
+                SELECT 1
+                FROM reminder_log
+                WHERE reminder_type = ? AND reminder_date = ? AND channel = ?
+                """,
+                (reminder_type, reminder_date, channel),
+            ).fetchone()
+        return row is not None
+
+    def mark_reminder_sent(self, reminder_type: str, reminder_date: str, channel: str) -> None:
+        """Persist a sent reminder marker; duplicate inserts are ignored."""
+        with self._connect() as conn:
+            conn.execute(
+                """
+                INSERT OR IGNORE INTO reminder_log (reminder_type, reminder_date, channel)
+                VALUES (?, ?, ?)
+                """,
+                (reminder_type, reminder_date, channel),
+            )
 

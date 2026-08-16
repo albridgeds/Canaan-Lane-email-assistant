@@ -54,3 +54,37 @@ def format_notification(message, decision) -> str:
         lines += ["", f"🔗 <b>Links:</b>\n{links_text}"]
 
     return "\n".join(lines)
+
+
+def format_deadline_digest(target_date_iso: str, records: list[dict]) -> str:
+    """Format one aggregated reminder for emails with deadline on target date."""
+    lines = [
+        "⏰ <b>Reminder: deadlines tomorrow</b>",
+        "",
+        f"Date: <b>{_e(target_date_iso)}</b>",
+        f"Total tasks: <b>{len(records)}</b>",
+        "",
+    ]
+
+    for index, record in enumerate(records, start=1):
+        importance_raw = (record.get("importance") or "").lower()
+        importance_icon = _IMPORTANCE_ICON.get(importance_raw, "📋")
+
+        lines.append(f"{index}. {importance_icon} <b>{_e(record.get('subject'))}</b>")
+
+        action = record.get("action")
+        if action:
+            lines.append(f"   Action: {_e(action)}")
+
+        sender = record.get("sender")
+        if sender:
+            lines.append(f"   From: {_e(sender)}")
+
+        links = record.get("links") or []
+        if links:
+            lines.append(f"   Link: <a href=\"{html.escape(links[0], quote=True)}\">open</a>")
+
+        lines.append("")
+
+    return "\n".join(lines).rstrip()
+
