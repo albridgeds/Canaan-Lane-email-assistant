@@ -3,13 +3,17 @@
 This folder contains `systemd` unit templates for running `email_assistant` on Raspberry Pi as a scheduled task.
 
 Files:
-- `email-assistant.service` - one-shot run of `app.py`
-- `email-assistant.timer` - periodic schedule for the service
+- `email-assistant.service` - one-shot run of `app.py` (hourly email processing)
+- `email-assistant.timer` - periodic schedule for `email-assistant.service` (Mon–Fri 9:00–18:00, every hour)
+- `email-assistant-reminders.service` - one-shot run of deadline reminder script
+- `email-assistant-reminders.timer` - daily schedule for `email-assistant-reminders.service` (daily at 19:00)
 - `install.sh` - helper installer script
 - `update.sh` - manual update script (sync from GitHub `main` + reload units)
 
 Before install:
-1. Update `User`, `WorkingDirectory`, and `ExecStart` in `email-assistant.service`.
+1. Update `User`, `WorkingDirectory`, and `ExecStart` in both `.service` files:
+   - `email-assistant.service` (email processing)
+   - `email-assistant-reminders.service` (daily reminders)
 2. Make sure the virtual environment and dependencies are installed.
 3. Ensure runtime files/config are available on the server (for example: `credentials.json`, `token.json`, and environment variables if required).
 
@@ -24,21 +28,25 @@ Check status and logs:
 ```bash
 systemctl status email-assistant.service --no-pager
 systemctl status email-assistant.timer --no-pager
+systemctl status email-assistant-reminders.service --no-pager
+systemctl status email-assistant-reminders.timer --no-pager
 systemctl list-timers --all | grep email-assistant
 journalctl -u email-assistant.service -n 100 --no-pager
+journalctl -u email-assistant-reminders.service -n 100 --no-pager
 ```
 
 Reload after file updates:
 ```bash
 # If only app code/config changed:
-sudo systemctl restart email-assistant.timer
+sudo systemctl restart email-assistant.timer email-assistant-reminders.timer
 
 # If .service/.timer files changed in /etc/systemd/system:
 sudo systemctl daemon-reload
-sudo systemctl restart email-assistant.timer
+sudo systemctl restart email-assistant.timer email-assistant-reminders.timer
 
 # Optional: run job immediately to verify
 sudo systemctl start email-assistant.service
+sudo systemctl start email-assistant-reminders.service
 ```
 
 Manual update on Raspberry Pi:
@@ -58,6 +66,8 @@ Disable/remove:
 ```bash
 sudo systemctl disable --now email-assistant.timer
 sudo systemctl disable --now email-assistant.service || true
-sudo rm -f /etc/systemd/system/email-assistant.service /etc/systemd/system/email-assistant.timer
+sudo systemctl disable --now email-assistant-reminders.timer
+sudo systemctl disable --now email-assistant-reminders.service || true
+sudo rm -f /etc/systemd/system/email-assistant*.service /etc/systemd/system/email-assistant*.timer
 sudo systemctl daemon-reload
 ```

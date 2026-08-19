@@ -92,11 +92,38 @@ python scripts\send_deadline_reminders.py
 This sends one aggregated reminder for tomorrow deadlines (`should_notify=True`) to both
 `TELEGRAM_CHAT_ID` and `TELEGRAM_DEBUG_CHAT_ID` (if debug chat is configured).
 
-### Optional: schedule daily reminder in Windows Task Scheduler
+#### Windows: Schedule with Task Scheduler
+
+Create a scheduled task to run once daily at 19:00:
 
 ```powershell
-schtasks /Create /SC DAILY /ST 19:00 /TN "EmailAssistant-DeadlineReminder" /TR "powershell.exe -NoProfile -ExecutionPolicy Bypass -Command \"cd C:\Users\albri\PycharmProjects\email_assistant; .\.venv\Scripts\python.exe scripts\send_deadline_reminders.py\""
+$TaskPath = "C:\Users\albri\PycharmProjects\email_assistant"
+$TaskVenv = "$TaskPath\.venv\Scripts\python.exe"
+$TaskScript = "$TaskPath\scripts\send_deadline_reminders.py"
+
+$Action = New-ScheduledTaskAction -Execute $TaskVenv -Argument $TaskScript -WorkingDirectory $TaskPath
+$Trigger = New-ScheduledTaskTrigger -Daily -At 19:00
+Register-ScheduledTask -TaskName "EmailAssistant-DeadlineReminder" -Action $Action -Trigger $Trigger -RunLevel Highest
 ```
+
+#### Linux/Raspberry Pi: Schedule with systemd
+
+1. Update `User`, `WorkingDirectory`, and `ExecStart` in both:
+   - `systemd_template/email-assistant.service`
+   - `systemd_template/email-assistant-reminders.service`
+
+2. Install both timers:
+   ```bash
+   cd systemd_template
+   chmod +x install.sh
+   sudo ./install.sh
+   ```
+
+3. Verify timers are running:
+   ```bash
+   sudo systemctl list-timers --all | grep email-assistant
+   journalctl -u email-assistant-reminders.service -n 20 --no-pager
+   ```
 
 ### View Database Records
 
