@@ -1,0 +1,15 @@
+[Unit]
+Description=Email Assistant Daily Deadline Reminders (once a day)
+After=network-online.target
+Wants=network-online.target
+
+[Timer]
+# Daily at 19:00
+OnCalendar=*-*-* 19:00:00
+OnBootSec=5min
+Persistent=true
+Unit=email-assistant-reminders.service
+
+[Install]
+WantedBy=timers.target
+

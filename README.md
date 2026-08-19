@@ -68,6 +68,13 @@ Send one aggregated reminder for tomorrow deadlines (`should_notify=True`) to bo
 python scripts\send_deadline_reminders.py
 ```
 
+**Scheduling:**
+- **Linux/Raspberry Pi (systemd)**: See [`systemd_template/README.md`](systemd_template/README.md). Two timers are available:
+  - `email-assistant.timer` - runs `app.py` hourly (Mon–Fri 9:00–18:00)
+  - `email-assistant-reminders.timer` - runs `send_deadline_reminders.py` daily at 19:00
+
+- **Windows (Task Scheduler)**: See [`docs/SETUP.md`](docs/SETUP.md) for `schtasks` example.
+
 ### View Database
 
 View all processed emails:

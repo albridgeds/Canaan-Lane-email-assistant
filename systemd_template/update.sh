@@ -3,6 +3,8 @@ set -euo pipefail
 
 SERVICE_NAME="email-assistant.service"
 TIMER_NAME="email-assistant.timer"
+SERVICE_REMINDERS_NAME="email-assistant-reminders.service"
+TIMER_REMINDERS_NAME="email-assistant-reminders.timer"
 REMOTE_NAME="origin"
 BRANCH_NAME="main"
 SYSTEMD_DIR="/etc/systemd/system"
@@ -72,15 +74,21 @@ fi
 echo "Installing/refreshing systemd units..."
 run_root install -m 0644 "${REPO_DIR}/systemd_template/${SERVICE_NAME}" "${SYSTEMD_DIR}/${SERVICE_NAME}"
 run_root install -m 0644 "${REPO_DIR}/systemd_template/${TIMER_NAME}" "${SYSTEMD_DIR}/${TIMER_NAME}"
+run_root install -m 0644 "${REPO_DIR}/systemd_template/${SERVICE_REMINDERS_NAME}" "${SYSTEMD_DIR}/${SERVICE_REMINDERS_NAME}"
+run_root install -m 0644 "${REPO_DIR}/systemd_template/${TIMER_REMINDERS_NAME}" "${SYSTEMD_DIR}/${TIMER_REMINDERS_NAME}"
 
 run_root systemctl daemon-reload
 run_root systemctl restart "${TIMER_NAME}"
+run_root systemctl restart "${TIMER_REMINDERS_NAME}"
 # oneshot service: restart triggers an immediate run with updated code
 run_root systemctl restart "${SERVICE_NAME}"
+run_root systemctl restart "${SERVICE_REMINDERS_NAME}"
 
 echo
 run_root systemctl status "${SERVICE_NAME}" --no-pager || true
 run_root systemctl status "${TIMER_NAME}" --no-pager || true
+run_root systemctl status "${SERVICE_REMINDERS_NAME}" --no-pager || true
+run_root systemctl status "${TIMER_REMINDERS_NAME}" --no-pager || true
 
 echo
 run_root systemctl list-timers --all | grep "email-assistant" || true
