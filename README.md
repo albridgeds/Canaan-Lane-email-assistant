@@ -65,7 +65,7 @@ python app.py
 Send one aggregated reminder for tomorrow deadlines (`should_notify=True`) to both main and debug chats:
 
 ```powershell
-python scripts\send_deadline_reminders.py
+python send_deadline_reminders.py
 ```
 
 **Scheduling:**
