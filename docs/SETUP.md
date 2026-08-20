@@ -86,7 +86,7 @@ python app.py
 ### Daily Deadline Reminder
 
 ```powershell
-python scripts\send_deadline_reminders.py
+python send_deadline_reminders.py
 ```
 
 This sends one aggregated reminder for tomorrow deadlines (`should_notify=True`) to both
@@ -99,7 +99,7 @@ Create a scheduled task to run once daily at 19:00:
 ```powershell
 $TaskPath = "C:\Users\albri\PycharmProjects\email_assistant"
 $TaskVenv = "$TaskPath\.venv\Scripts\python.exe"
-$TaskScript = "$TaskPath\scripts\send_deadline_reminders.py"
+$TaskScript = "$TaskPath\send_deadline_reminders.py"
 
 $Action = New-ScheduledTaskAction -Execute $TaskVenv -Argument $TaskScript -WorkingDirectory $TaskPath
 $Trigger = New-ScheduledTaskTrigger -Daily -At 19:00
