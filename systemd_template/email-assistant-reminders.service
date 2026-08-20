@@ -9,7 +9,7 @@ Type=oneshot
 User=user
 WorkingDirectory=/home/user/workspace/email_assistant
 Environment=PYTHONUNBUFFERED=1
-ExecStart=/home/user/workspace/email_assistant/venv/bin/python /home/user/workspace/email_assistant/scripts/send_deadline_reminders.py
+ExecStart=/home/user/workspace/email_assistant/venv/bin/python /home/user/workspace/email_assistant/send_deadline_reminders.py
 
 StandardOutput=journal
 StandardError=journal
