@@ -168,8 +168,8 @@ email_assistant/
 │   └── utils/
 │       ├── prompts.py            # LLM prompts
 │       └── text.py               # Text utilities
+├── send_deadline_reminders.py     # Daily deadline reminders
 ├── scripts/
-│   ├── send_deadline_reminders.py # Daily deadline reminders
 │   └── view_db.py                # Database viewer
 ├── app.py                        # Main application
 ├── requirements.txt              # Dependencies

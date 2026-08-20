@@ -56,6 +56,10 @@ else
 fi
 git reset --hard "${REMOTE_NAME}/${BRANCH_NAME}"
 
+echo "Restoring executable permissions on helper scripts..."
+chmod +x "${REPO_DIR}/systemd_template/install.sh"
+chmod +x "${REPO_DIR}/systemd_template/update.sh"
+
 echo "Updating Python dependencies..."
 if [[ -x "${REPO_DIR}/venv/bin/python" ]]; then
   PYTHON_BIN="${REPO_DIR}/venv/bin/python"

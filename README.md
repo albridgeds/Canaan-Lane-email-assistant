@@ -109,8 +109,8 @@ email_assistant/
 │   └── utils/
 │       ├── prompts.py            # LLM system prompts
 │       └── text.py               # Text processing utilities
+├── send_deadline_reminders.py     # Daily deadline digest sender
 ├── scripts/
-│   ├── send_deadline_reminders.py # Daily deadline digest sender
 │   └── view_db.py                # Database viewer CLI
 ├── docs/
 │   ├── SETUP.md                  # Detailed setup instructions

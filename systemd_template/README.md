@@ -52,12 +52,12 @@ sudo systemctl start email-assistant-reminders.service
 Manual update on Raspberry Pi:
 ```bash
 cd /home/pi/email_assistant/systemd_template
-chmod +x update.sh
-./update.sh
+bash update.sh
 ```
 
 What `update.sh` does:
 - fetches and hard-resets local repo to `origin/main`
+- restores executable bit on `systemd_template/install.sh` and `systemd_template/update.sh`
 - installs Python dependencies from `requirements.txt` using `venv`/`.venv` if present
 - installs current unit files into `/etc/systemd/system`
 - runs `systemctl daemon-reload`, restarts timer, and restarts service once
